@@ -1,0 +1,29 @@
+services:
+  app:
+    build:
+      context: ./app
+    ports:
+      - "8000:8000"
+    environment:
+      INITIAL_FAILURE_RATE: "0"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')",
+        ]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+
+  load-generator:
+    build:
+      context: ./load-generator
+    environment:
+      TARGET_URL: "http://app:8000/work"
+      REQUEST_INTERVAL_SECONDS: "0.1"
+    depends_on:
+      app:
+        condition: service_healthy
