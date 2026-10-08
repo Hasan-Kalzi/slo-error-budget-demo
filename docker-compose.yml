@@ -45,3 +45,22 @@ services:
       - "9093:9093"
     volumes:
       - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+
+  tests:
+    # Build the test runner from the files inside ./tests.
+    build:
+      context: ./tests
+
+    # Tell the tests how to reach the application inside the Compose network.
+    environment:
+      APP_BASE_URL: "http://app:8000"
+
+    # Do not start the tests until the application's healthcheck succeeds.
+    depends_on:
+      app:
+        condition: service_healthy
+
+    # Exclude tests from the normal demo startup.
+    # The service runs only when the "test" profile is explicitly enabled.
+    profiles:
+      - test
